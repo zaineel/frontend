@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import { LineChart, Target } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -7,6 +8,67 @@ import { Button } from "@/components/ui/button";
 import { FolderIcon } from "lucide-react";
 
 export default function Dashboard() {
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [expenseData, setExpenseData] = useState({
+    amount: "",
+    category: "",
+    description: "",
+    date: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setExpenseData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Build the expense payload (note: remove id since the server auto-generates it)
+    const payload = {
+      userId: 1, // or use the actual authenticated user's ID
+      amount: parseFloat(expenseData.amount),
+      category: expenseData.category,
+      description: expenseData.description,
+      date: expenseData.date, // expected format: YYYY-MM-DD
+    };
+
+    try {
+      const res = await fetch(
+        "https://backend-9ns2.onrender.com/api/Expenses",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Request failed");
+      }
+      const data = await res.json();
+      console.log("Expense created:", data);
+      alert("Expense added successfully!");
+      // Reset form and close modal
+      setExpenseData({
+        amount: "",
+        category: "",
+        description: "",
+        date: "",
+      });
+      setShowExpenseForm(false);
+    } catch (error) {
+      console.error("Error adding expense:", error);
+      alert("Error adding expense. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
       {/* Stats Cards */}
@@ -42,7 +104,11 @@ export default function Dashboard() {
 
       {/* Action Buttons */}
       <div className='flex space-x-4 mb-8'>
-        <Button className='bg-blue-600 hover:bg-blue-700'>+ Add Expense</Button>
+        <Button
+          className='bg-blue-600 hover:bg-blue-700'
+          onClick={() => setShowExpenseForm(true)}>
+          + Add Expense
+        </Button>
         <Button className='bg-emerald-600 hover:bg-emerald-700'>
           <Target className='w-4 h-4 mr-2' /> Set Goal
         </Button>
@@ -123,24 +189,93 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Footer */}
-      <footer className='mt-12 flex items-center justify-between text-sm text-gray-500'>
-        <div className='flex items-center'>
-          <FolderIcon className='h-4 w-4 mr-2' />
-          <span>Secure SSL Encryption</span>
+      {/* Add Expense Modal */}
+      {showExpenseForm && (
+        <div className='fixed inset-0 flex items-center justify-center z-50'>
+          {/* Backdrop */}
+          <div
+            className='absolute inset-0 bg-black opacity-50'
+            onClick={() => setShowExpenseForm(false)}></div>
+          {/* Modal Content */}
+          <div className='bg-white p-6 rounded-lg shadow-lg z-10 w-full max-w-md'>
+            <h2 className='text-xl font-bold mb-4'>Add Expense</h2>
+            <form onSubmit={handleSubmit}>
+              <div className='mb-4'>
+                <label htmlFor='amount' className='block text-gray-700 mb-1'>
+                  Amount
+                </label>
+                <input
+                  type='number'
+                  step='0.01'
+                  id='amount'
+                  name='amount'
+                  value={expenseData.amount}
+                  onChange={handleInputChange}
+                  className='w-full px-3 py-2 border rounded'
+                  required
+                />
+              </div>
+              <div className='mb-4'>
+                <label htmlFor='category' className='block text-gray-700 mb-1'>
+                  Category
+                </label>
+                <input
+                  type='text'
+                  id='category'
+                  name='category'
+                  value={expenseData.category}
+                  onChange={handleInputChange}
+                  className='w-full px-3 py-2 border rounded'
+                  required
+                />
+              </div>
+              <div className='mb-4'>
+                <label
+                  htmlFor='description'
+                  className='block text-gray-700 mb-1'>
+                  Description
+                </label>
+                <textarea
+                  id='description'
+                  name='description'
+                  value={expenseData.description}
+                  onChange={handleInputChange}
+                  className='w-full px-3 py-2 border rounded'
+                  required></textarea>
+              </div>
+              <div className='mb-4'>
+                <label htmlFor='date' className='block text-gray-700 mb-1'>
+                  Date
+                </label>
+                <input
+                  type='date'
+                  id='date'
+                  name='date'
+                  value={expenseData.date}
+                  onChange={handleInputChange}
+                  className='w-full px-3 py-2 border rounded'
+                  required
+                />
+              </div>
+              <div className='flex justify-end space-x-4'>
+                <button
+                  type='button'
+                  onClick={() => setShowExpenseForm(false)}
+                  className='px-4 py-2 bg-gray-300 rounded hover:bg-gray-400'
+                  disabled={isSubmitting}>
+                  Cancel
+                </button>
+                <button
+                  type='submit'
+                  className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
+                  disabled={isSubmitting}>
+                  {isSubmitting ? "Submitting..." : "Submit"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div className='flex space-x-6'>
-          <a href='#' className='hover:text-gray-900'>
-            Privacy Policy
-          </a>
-          <a href='#' className='hover:text-gray-900'>
-            Terms of Service
-          </a>
-          <a href='#' className='hover:text-gray-900'>
-            Contact Support
-          </a>
-        </div>
-      </footer>
+      )}
     </main>
   );
 }
