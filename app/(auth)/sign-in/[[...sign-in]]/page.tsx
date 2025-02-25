@@ -9,7 +9,7 @@ export default function Page() {
         <FolderIcon className='h-10 w-10 text-blue-600' />
         <span className='ml-2 text-2xl font-bold'>FinanceTrack</span>
       </div>
-      <SignIn afterSignInUrl='/dashboard' redirectUrl='/dashboard' />
+      <SignIn afterSignInUrl='/dashboard' forceRedirectUrl='/dashboard' />
     </div>
   );
 }
