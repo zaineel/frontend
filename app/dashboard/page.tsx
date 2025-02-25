@@ -6,8 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { FolderIcon } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 
 export default function Dashboard() {
+  const { user } = useUser();
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [expenseData, setExpenseData] = useState({
     amount: "",
@@ -28,9 +30,15 @@ export default function Dashboard() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Build the expense payload (note: remove id since the server auto-generates it)
+    if (!user) {
+      alert("You must be logged in to add an expense");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Build the expense payload using the actual authenticated user's ID
     const payload = {
-      userId: 1, // or use the actual authenticated user's ID
+      userId: user.id, // Use the Clerk user ID instead of hardcoded "1"
       amount: parseFloat(expenseData.amount),
       category: expenseData.category,
       description: expenseData.description,
@@ -71,6 +79,11 @@ export default function Dashboard() {
 
   return (
     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+      {/* User ID Debug (you can remove this in production) */}
+      <div className='bg-gray-100 p-2 rounded mb-4 text-xs'>
+        Current user ID: {user?.id || "Not logged in"}
+      </div>
+
       {/* Stats Cards */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
         <Card className='p-6'>
@@ -106,7 +119,8 @@ export default function Dashboard() {
       <div className='flex space-x-4 mb-8'>
         <Button
           className='bg-blue-600 hover:bg-blue-700'
-          onClick={() => setShowExpenseForm(true)}>
+          onClick={() => setShowExpenseForm(true)}
+          disabled={!user}>
           + Add Expense
         </Button>
         <Button className='bg-emerald-600 hover:bg-emerald-700'>

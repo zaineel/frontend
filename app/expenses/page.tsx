@@ -30,6 +30,7 @@ export default function Expenses() {
       }
       const data = await res.json();
       setExpenses(data);
+      console.log("Fetched expenses:", data);
       setError(null);
     } catch (err) {
       console.error("Error fetching expenses:", err);
@@ -49,15 +50,10 @@ export default function Expenses() {
   useEffect(() => {
     const intervalId = setInterval(() => {
       fetchExpenses();
-    }, 10000); // Reduced to 10 seconds for quicker updates
+    }, 10000); // 10 seconds
 
     return () => clearInterval(intervalId); // Cleanup on unmount
   }, []);
-
-  // Handle adding a new expense to local state
-  const addExpense = (newExpense: Expense) => {
-    setExpenses((prevExpenses) => [...prevExpenses, newExpense]);
-  };
 
   // Manual refresh function
   const handleRefresh = () => {
@@ -65,19 +61,21 @@ export default function Expenses() {
     fetchExpenses();
   };
 
-  // Ensure we only display expenses for the logged in user, handling different ID formats
-  const currentUserId = user?.id;
+  // Filter expenses for the current user
   const userExpenses = expenses.filter((expense) => {
-    // Convert both IDs to strings for comparison to handle number vs string mismatches
+    if (!user) return false;
+
+    // Normalize the IDs to strings for comparison
     const expenseUserId = String(expense.userId);
-    const userIdToCompare = String(currentUserId);
+    const currentUserId = String(user.id);
 
-    // Debug logging to identify potential issues
+    // Debug logging
     console.log(
-      `Comparing expense userId: ${expenseUserId} with currentUserId: ${userIdToCompare}`
+      `Comparing expense userId: ${expenseUserId} with currentUserId: ${currentUserId}`
     );
+    console.log(`Match: ${expenseUserId === currentUserId}`);
 
-    return expenseUserId === userIdToCompare;
+    return expenseUserId === currentUserId;
   });
 
   return (
@@ -99,24 +97,30 @@ export default function Expenses() {
         </Button>
       </div>
 
+      {/* Debug information - can be removed in production */}
+      <div className='bg-gray-100 p-4 rounded mb-4 text-sm'>
+        <p>
+          <strong>Current user ID:</strong> {user?.id || "Not logged in"}
+        </p>
+        <p>
+          <strong>Total expenses in system:</strong> {expenses.length}
+        </p>
+        <p>
+          <strong>Filtered expenses for you:</strong> {userExpenses.length}
+        </p>
+        {expenses.length > 0 && (
+          <p>
+            <strong>First expense userId:</strong> {expenses[0]?.userId}
+          </p>
+        )}
+      </div>
+
       {loading && !refreshing ? (
         <p>Loading expenses...</p>
       ) : error ? (
         <p className='text-red-500'>{error}</p>
       ) : userExpenses.length === 0 ? (
-        <div>
-          <p>You haven't added any expenses yet.</p>
-          <div className='mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md'>
-            <p className='text-sm text-yellow-800'>
-              <strong>Debug info:</strong> Your current user ID:{" "}
-              {currentUserId || "Not logged in"}
-              <br />
-              Expenses in system: {expenses.length}
-              <br />
-              First expense userId (if any): {expenses[0]?.userId}
-            </p>
-          </div>
-        </div>
+        <p>You haven't added any expenses yet.</p>
       ) : (
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
           {userExpenses.map((expense) => (
