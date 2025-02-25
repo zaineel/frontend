@@ -45,14 +45,19 @@ export default function Expenses() {
     fetchExpenses();
   }, []);
 
-  // Polling for real-time updates (every 30 seconds)
+  // Polling for real-time updates (every 10 seconds)
   useEffect(() => {
     const intervalId = setInterval(() => {
       fetchExpenses();
-    }, 30000); // 30 seconds
+    }, 10000); // Reduced to 10 seconds for quicker updates
 
     return () => clearInterval(intervalId); // Cleanup on unmount
   }, []);
+
+  // Handle adding a new expense to local state
+  const addExpense = (newExpense: Expense) => {
+    setExpenses((prevExpenses) => [...prevExpenses, newExpense]);
+  };
 
   // Manual refresh function
   const handleRefresh = () => {
@@ -60,11 +65,20 @@ export default function Expenses() {
     fetchExpenses();
   };
 
-  // Ensure we only display expenses for the logged in user
+  // Ensure we only display expenses for the logged in user, handling different ID formats
   const currentUserId = user?.id;
-  const userExpenses = expenses.filter(
-    (expense) => expense.userId.toString() === currentUserId
-  );
+  const userExpenses = expenses.filter((expense) => {
+    // Convert both IDs to strings for comparison to handle number vs string mismatches
+    const expenseUserId = String(expense.userId);
+    const userIdToCompare = String(currentUserId);
+
+    // Debug logging to identify potential issues
+    console.log(
+      `Comparing expense userId: ${expenseUserId} with currentUserId: ${userIdToCompare}`
+    );
+
+    return expenseUserId === userIdToCompare;
+  });
 
   return (
     <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
@@ -90,7 +104,19 @@ export default function Expenses() {
       ) : error ? (
         <p className='text-red-500'>{error}</p>
       ) : userExpenses.length === 0 ? (
-        <p>You haven't added any expenses yet.</p>
+        <div>
+          <p>You haven't added any expenses yet.</p>
+          <div className='mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md'>
+            <p className='text-sm text-yellow-800'>
+              <strong>Debug info:</strong> Your current user ID:{" "}
+              {currentUserId || "Not logged in"}
+              <br />
+              Expenses in system: {expenses.length}
+              <br />
+              First expense userId (if any): {expenses[0]?.userId}
+            </p>
+          </div>
+        </div>
       ) : (
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
           {userExpenses.map((expense) => (
