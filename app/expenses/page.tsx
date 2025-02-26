@@ -36,7 +36,13 @@ export default function Expenses() {
 
   const fetchExpenses = async () => {
     try {
-      const res = await fetch("https://backend-9ns2.onrender.com/api/Expenses");
+      // Add the userId as a query parameter if a user is logged in
+      const endpoint =
+        user && currentUserNumericId
+          ? `https://backend-9ns2.onrender.com/api/Expenses?userId=${currentUserNumericId}`
+          : "https://backend-9ns2.onrender.com/api/Expenses";
+
+      const res = await fetch(endpoint);
       if (!res.ok) {
         throw new Error("Error fetching expenses");
       }
