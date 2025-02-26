@@ -61,17 +61,18 @@ export default function Expenses() {
     fetchExpenses();
   };
 
-  // Filter expenses for the current user
+  // Filter expenses for the current user with improved string comparison
   const userExpenses = expenses.filter((expense) => {
     if (!user) return false;
 
-    // Normalize the IDs to strings for comparison
+    // Normalize both IDs to strings
     const expenseUserId = String(expense.userId);
     const currentUserId = String(user.id);
 
     // Debug logging
     console.log(
-      `Comparing expense userId: ${expenseUserId} with currentUserId: ${currentUserId}`
+      `Comparing expense userId: ${expenseUserId} with currentUserId: ${currentUserId}`,
+      `Types: ${typeof expense.userId}, ${typeof user.id}`
     );
     console.log(`Match: ${expenseUserId === currentUserId}`);
 
@@ -100,7 +101,8 @@ export default function Expenses() {
       {/* Debug information - can be removed in production */}
       <div className='bg-gray-100 p-4 rounded mb-4 text-sm'>
         <p>
-          <strong>Current user ID:</strong> {user?.id || "Not logged in"}
+          <strong>Current user ID:</strong> {user?.id || "Not logged in"} (type:{" "}
+          {typeof user?.id})
         </p>
         <p>
           <strong>Total expenses in system:</strong> {expenses.length}
@@ -110,7 +112,8 @@ export default function Expenses() {
         </p>
         {expenses.length > 0 && (
           <p>
-            <strong>First expense userId:</strong> {expenses[0]?.userId}
+            <strong>First expense userId:</strong> {expenses[0]?.userId} (type:{" "}
+            {typeof expenses[0]?.userId})
           </p>
         )}
       </div>

@@ -36,9 +36,9 @@ export default function Dashboard() {
       return;
     }
 
-    // Build the expense payload using the actual authenticated user's ID
+    // Use string format for userId to ensure consistent formatting
     const payload = {
-      userId: user.id, // Use the Clerk user ID instead of hardcoded "1"
+      userId: String(user.id), // Convert to string to match the expected format
       amount: parseFloat(expenseData.amount),
       category: expenseData.category,
       description: expenseData.description,
