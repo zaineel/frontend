@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card } from "../../components/ui/card";
+import { Card } from "@/components/ui/card";
 import { useUser } from "@clerk/nextjs";
-import { Button } from "../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 type Expense = {
@@ -111,26 +111,6 @@ export default function Expenses() {
             "Refresh"
           )}
         </Button>
-      </div>
-
-      {/* Debug information - can be removed in production */}
-      <div className='bg-gray-100 p-4 rounded mb-4 text-sm'>
-        <p>
-          <strong>Current user ID:</strong> {user?.id || "Not logged in"}
-          {user && <> (mapped to numeric: {currentUserNumericId})</>}
-        </p>
-        <p>
-          <strong>Total expenses in system:</strong> {expenses.length}
-        </p>
-        <p>
-          <strong>Filtered expenses for you:</strong> {userExpenses.length}
-        </p>
-        {expenses.length > 0 && (
-          <p>
-            <strong>First expense userId:</strong> {expenses[0]?.userId} (type:{" "}
-            {typeof expenses[0]?.userId})
-          </p>
-        )}
       </div>
 
       {loading && !refreshing ? (

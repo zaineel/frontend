@@ -22,20 +22,24 @@ export default function DashboardNav() {
               Dashboard
             </Link>
             <Link
-              href='/expenses'
+              href='/dashboard/expenses'
               className='text-gray-600 hover:text-gray-900'>
               Expenses
             </Link>
-            <Link href='/goals' className='text-gray-600 hover:text-gray-900'>
+            <Link
+              href='/dashboard/goals'
+              className='text-gray-600 hover:text-gray-900'>
               Goals
             </Link>
-            <Link href='/reports' className='text-gray-600 hover:text-gray-900'>
+            <Link
+              href='/dashboard/reports'
+              className='text-gray-600 hover:text-gray-900'>
               Reports
             </Link>
           </div>
           <div className='flex items-center space-x-4'>
             <Bell className='h-6 w-6 text-gray-400 hover:text-gray-600 cursor-pointer' />
-            <UserButton afterSignOutUrl='/sign-in' />
+            <UserButton afterSwitchSessionUrl='/sign-in' />
           </div>
         </div>
       </div>
