@@ -105,12 +105,6 @@ export default function Dashboard() {
 
   return (
     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-      {/* User ID Debug (you can remove this in production) */}
-      <div className='bg-gray-100 p-2 rounded mb-4 text-xs'>
-        Current user ID: {user?.id || "Not logged in"}
-        {user && <> (numeric: {generateNumericId(user.id)})</>}
-      </div>
-
       {/* Stats Cards */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
         <Card className='p-6'>
