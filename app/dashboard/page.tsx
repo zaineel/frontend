@@ -36,9 +36,18 @@ export default function Dashboard() {
       return;
     }
 
-    // Use string format for userId to ensure consistent formatting
+    // Generate a numerical userId from the Clerk user.id string
+    // This ensures compatibility with the C# backend model which expects an integer
+    const numericUserId = generateNumericId(user.id);
+    console.log(
+      "Generated numeric ID:",
+      numericUserId,
+      "from original:",
+      user.id
+    );
+
     const payload = {
-      userId: String(user.id), // Convert to string to match the expected format
+      userId: numericUserId, // Use the numeric ID for backend compatibility
       amount: parseFloat(expenseData.amount),
       category: expenseData.category,
       description: expenseData.description,
@@ -61,6 +70,7 @@ export default function Dashboard() {
       const data = await res.json();
       console.log("Expense created:", data);
       alert("Expense added successfully!");
+
       // Reset form and close modal
       setExpenseData({
         amount: "",
@@ -77,11 +87,28 @@ export default function Dashboard() {
     }
   };
 
+  // Function to generate a consistent numeric ID from a string
+  // This ensures the same string always maps to the same number
+  function generateNumericId(str: string): number {
+    // Use a simple hash function to convert the string to a number
+    // This will ensure consistent numeric IDs for the same string
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+
+    // Make sure the ID is positive and within a reasonable range for an int
+    return Math.abs(hash) % 1000000000; // Keep it within 9 digits to fit in most int columns
+  }
+
   return (
     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
       {/* User ID Debug (you can remove this in production) */}
       <div className='bg-gray-100 p-2 rounded mb-4 text-xs'>
         Current user ID: {user?.id || "Not logged in"}
+        {user && <> (numeric: {generateNumericId(user.id)})</>}
       </div>
 
       {/* Stats Cards */}

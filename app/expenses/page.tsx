@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 
 type Expense = {
   id: number;
-  userId: number | string;
+  userId: number; // Changed to number to match backend model
   amount: number;
   category: string;
   description: string;
@@ -21,6 +21,18 @@ export default function Expenses() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Function to generate a consistent numeric ID from a string
+  // Must match exactly with the function in Dashboard.tsx
+  function generateNumericId(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash) % 1000000000; // Keep it within 9 digits
+  }
 
   const fetchExpenses = async () => {
     try {
@@ -61,22 +73,19 @@ export default function Expenses() {
     fetchExpenses();
   };
 
-  // Filter expenses for the current user with improved string comparison
+  // Calculate the current user's numeric ID
+  const currentUserNumericId = user ? generateNumericId(user.id) : null;
+
+  // Filter expenses for the current user using the numeric ID
   const userExpenses = expenses.filter((expense) => {
-    if (!user) return false;
+    if (!user || currentUserNumericId === null) return false;
 
-    // Normalize both IDs to strings
-    const expenseUserId = String(expense.userId);
-    const currentUserId = String(user.id);
-
-    // Debug logging
+    // Both should now be numbers so comparison should work properly
     console.log(
-      `Comparing expense userId: ${expenseUserId} with currentUserId: ${currentUserId}`,
-      `Types: ${typeof expense.userId}, ${typeof user.id}`
+      `Comparing expense userId: ${expense.userId} with generated numericId: ${currentUserNumericId}`
     );
-    console.log(`Match: ${expenseUserId === currentUserId}`);
 
-    return expenseUserId === currentUserId;
+    return expense.userId === currentUserNumericId;
   });
 
   return (
@@ -101,8 +110,8 @@ export default function Expenses() {
       {/* Debug information - can be removed in production */}
       <div className='bg-gray-100 p-4 rounded mb-4 text-sm'>
         <p>
-          <strong>Current user ID:</strong> {user?.id || "Not logged in"} (type:{" "}
-          {typeof user?.id})
+          <strong>Current user ID:</strong> {user?.id || "Not logged in"}
+          {user && <> (mapped to numeric: {currentUserNumericId})</>}
         </p>
         <p>
           <strong>Total expenses in system:</strong> {expenses.length}
