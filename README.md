@@ -9,9 +9,10 @@ The frontend is built using Next.js to provide a responsive and intuitive user e
 ## Technologies Used
 
 - **Framework**: Next.js
-- **UI Libraries**: [Any UI libraries used, e.g., Material-UI, TailwindCSS]
-- **State Management**: [State management solution, e.g., React Context, Redux]
-- **Testing Tools**: [Testing frameworks, e.g., Jest, React Testing Library]
+- **UI Libraries**: Tailwind CSS
+- **State Management**:
+- **Testing Tools**: React Testing Library
+- **TypeScript**: For type safety and better development experience
 
 ## Getting Started
 
@@ -87,9 +88,9 @@ The application is deployed and accessible at: https://budgetbuddy.zaineelmithan
 
 ## Additional Resources
 
-- [Design mockups and wireframes]
-- [API documentation]
-- [Project roadmap]
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://reactjs.org/docs/getting-started.html)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 
 ## Contact
 
