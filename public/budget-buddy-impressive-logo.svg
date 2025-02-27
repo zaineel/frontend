@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+    
+    <linearGradient id="accent-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+    
+    <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    
+    <!-- Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#000" flood-opacity="0.3" />
+    </filter>
+  
+    <!-- Animations -->
+    <style>
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+        100% { transform: translateY(0px); }
+      }
+      
+      @keyframes pulse {
+        0% { opacity: 0.8; }
+        50% { opacity: 1; }
+        100% { opacity: 0.8; }
+      }
+      
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      @keyframes dash {
+        to { stroke-dashoffset: 0; }
+      }
+      
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .logo-container {
+        animation: float 6s ease-in-out infinite;
+      }
+      
+      .glow-effect {
+        animation: pulse 3s ease-in-out infinite;
+      }
+      
+      .coin {
+        animation: spin 12s linear infinite;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+      
+      .coin-small {
+        animation: spin 8s linear infinite reverse;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+      
+      .path-animation {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        animation: dash 3s ease-in-out forwards;
+      }
+      
+      .fade-up {
+        animation: fadeUp 1s ease-out forwards;
+        opacity: 0;
+      }
+      
+      .delay-1 {
+        animation-delay: 0.2s;
+      }
+      
+      .delay-2 {
+        animation-delay: 0.4s;
+      }
+      
+      .delay-3 {
+        animation-delay: 0.6s;
+      }
+    </style>
+  </defs>
+  
+  <!-- Background Shape -->
+  <rect width="400" height="400" rx="40" fill="url(#bg-gradient)" />
+  
+  <!-- Main Logo Elements -->
+  <g class="logo-container" filter="url(#shadow)">
+    <!-- Abstract Financial Chart Line -->
+    <path class="path-animation" d="M80,240 C120,200 150,280 200,200 S280,160 340,120" stroke="#64748B" stroke-width="3" fill="none" stroke-linecap="round" />
+    
+    <!-- Main "B" Shape with Glow -->
+    <g class="glow-effect" filter="url(#glow)">
+      <path d="M150,100 h100 c20,0 40,15 40,40 c0,25 -20,40 -40,40 h20 c20,0 40,15 40,40 c0,25 -20,40 -40,40 h-120 v-160 Z" fill="url(#accent-gradient)" />
+    </g>
+    
+    <!-- Inner Details -->
+    <path class="fade-up delay-1" d="M170,120 h60 c10,0 20,10 20,20 s-10,20 -20,20 h-60 v-40 Z" fill="#0F172A" />
+    <path class="fade-up delay-2" d="M170,180 h60 c10,0 20,10 20,20 s-10,20 -20,20 h-60 v-40 Z" fill="#0F172A" />
+    
+    <!-- Dollar Symbol -->
+    <g class="fade-up delay-3">
+      <path d="M195,135 v80 M185,135 v80" stroke="#3B82F6" stroke-width="6" stroke-linecap="round" />
+      <path d="M175,150 c0,-10 20,-20 35,-20 c15,0 35,10 35,20 c0,10 -10,20 -35,20 c-25,0 -35,10 -35,20 c0,10 20,20 35,20 c15,0 35,-10 35,-20" stroke="#3B82F6" stroke-width="6" fill="none" stroke-linecap="round" />
+    </g>
+    
+    <!-- Coins -->
+    <g class="coin" transform="translate(290,110)">
+      <circle cx="0" cy="0" r="30" fill="url(#gold-gradient)" />
+      <circle cx="0" cy="0" r="20" fill="#F59E0B" opacity="0.7" />
+      <path d="M-5,0 h10 M0,-5 v10" stroke="#FBBF24" stroke-width="2" stroke-linecap="round" />
+    </g>
+    
+    <g class="coin-small" transform="translate(270,220)">
+      <circle cx="0" cy="0" r="20" fill="url(#gold-gradient)" />
+      <circle cx="0" cy="0" r="12" fill="#F59E0B" opacity="0.7" />
+      <path d="M-3,0 h6 M0,-3 v6" stroke="#FBBF24" stroke-width="1.5" stroke-linecap="round" />
+    </g>
+  </g>
+  
+  <!-- App Name -->
+  <g transform="translate(200,320)" text-anchor="middle">
+    <text class="fade-up delay-1" font-family="Arial, sans-serif" font-weight="900" font-size="36" fill="#FFFFFF">BUDGET</text>
+    <text class="fade-up delay-2" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#3B82F6" y="35">BUDDY</text>
+  </g>
+  
+  <!-- Tagline -->
+  <text class="fade-up delay-3" x="200" y="370" font-family="Arial, sans-serif" font-weight="400" font-size="14" fill="#94A3B8" text-anchor="middle">SMART FINANCE SIMPLIFIED</text>
+</svg>

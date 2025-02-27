@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <style>
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      0% { transform: translateY(20px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes rotateCoin {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .logo-bg {
+      animation: fadeIn 1.5s ease-out forwards;
+    }
+    
+    .b-shape {
+      animation: slideUp 1s ease-out forwards;
+      animation-delay: 0.5s;
+      opacity: 0;
+    }
+    
+    .coin {
+      animation: rotateCoin 3s infinite linear;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    
+    .dollar-sign {
+      animation: pulse 2s infinite ease-in-out;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    
+    .logo-text {
+      animation: fadeIn 1s forwards;
+      animation-delay: 1.2s;
+      opacity: 0;
+    }
+  </style>
+
+  <!-- Background Circle - Subtle gradient for depth -->
+  <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#f8f9fa" />
+    <stop offset="100%" stop-color="#e9ecef" />
+  </linearGradient>
+  <circle class="logo-bg" cx="150" cy="150" r="140" fill="url(#bg-gradient)" />
+  
+  <!-- Main Logo Shape - Professional "B" -->
+  <linearGradient id="b-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#0466c8" />
+    <stop offset="100%" stop-color="#0353a4" />
+  </linearGradient>
+  <path class="b-shape" d="M100,70 C100,70 170,70 190,90 C210,110 195,150 160,150 C195,150 210,190 190,210 C170,230 100,230 100,230 L100,70 Z" fill="url(#b-gradient)" />
+  
+  <!-- Inner Details to Create the "B" Effect -->
+  <path class="b-shape" d="M120,90 L160,90 C175,90 185,105 170,125 C155,145 120,125 120,125 L120,90 Z" fill="#f8f9fa" />
+  <path class="b-shape" d="M120,175 L160,175 C175,175 185,190 170,210 C155,230 120,210 120,210 L120,175 Z" fill="#f8f9fa" />
+  
+  <!-- Dollar Sign Inside -->
+  <g class="dollar-sign">
+    <path d="M145,125 L155,125 L155,175 L145,175 Z" fill="#023e7d" />
+    <path d="M165,135 C165,128 155,120 150,120 C145,120 135,128 135,135 C135,142 145,150 150,150 C155,150 165,158 165,165 C165,172 155,180 150,180 C145,180 135,172 135,165" stroke="#023e7d" stroke-width="8" fill="none" />
+  </g>
+  
+  <!-- Coin Icons -->
+  <g class="coin">
+    <circle cx="220" cy="90" r="20" fill="#ffd700" />
+    <circle cx="220" cy="90" r="10" fill="#ffea00" />
+    <path d="M215,90 L225,90 M220,85 L220,95" stroke="#d4af37" stroke-width="1.5" />
+  </g>
+  
+  <g class="coin" style="animation-delay: 0.5s">
+    <circle cx="220" cy="210" r="20" fill="#ffd700" />
+    <circle cx="220" cy="210" r="10" fill="#ffea00" />
+    <path d="M215,210 L225,210 M220,205 L220,215" stroke="#d4af37" stroke-width="1.5" />
+  </g>
+  
+  <!-- Text "Budget Buddy" - More professional font -->
+  <text class="logo-text" x="150" y="270" font-family="Arial, sans-serif" font-weight="bold" font-size="22" text-anchor="middle" fill="#001845">Budget Buddy</text>
+</svg>

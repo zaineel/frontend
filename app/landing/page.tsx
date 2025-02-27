@@ -80,10 +80,11 @@ export default function LandingPage() {
             <div className='absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-75 animate-pulse'></div>
             <div className='relative bg-white p-8 rounded-lg shadow-xl'>
               <div className='grid grid-cols-2 gap-4'>
-                <div className='h-32 bg-gray-50 rounded-lg animate-pulse'></div>
-                <div className='h-32 bg-gray-50 rounded-lg animate-pulse delay-100'></div>
-                <div className='h-32 bg-gray-50 rounded-lg animate-pulse delay-200'></div>
-                <div className='h-32 bg-gray-50 rounded-lg animate-pulse delay-300'></div>
+                <img
+                  src='budget-buddy-logo.svg'
+                  alt='Budget Buddy Logo'
+                  className='col-span-2'
+                />
               </div>
             </div>
           </div>
