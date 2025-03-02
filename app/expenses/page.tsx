@@ -39,8 +39,8 @@ export default function Expenses() {
       // Add the userId as a query parameter if a user is logged in
       const endpoint =
         user && currentUserNumericId
-          ? `https://backend-9ns2.onrender.com/api/Expenses?userId=${currentUserNumericId}`
-          : "https://backend-9ns2.onrender.com/api/Expenses";
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/Expenses?userId=${currentUserNumericId}`
+          : `${process.env.NEXT_PUBLIC_API_URL}/api/Expenses`;
 
       const res = await fetch(endpoint);
       if (!res.ok) {
