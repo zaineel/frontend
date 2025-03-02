@@ -56,7 +56,7 @@ export default function Dashboard() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}api/Expenses`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Expenses`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
