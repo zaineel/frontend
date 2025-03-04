@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { LineChart, Target } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { LineChart, Target, Check, X, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,24 @@ export default function Dashboard() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // New notification state
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "success", // "success", "error"
+  });
+
+  // Hide notification after timeout
+  useEffect(() => {
+    let timer: string | number | NodeJS.Timeout | undefined;
+    if (notification.show) {
+      timer = setTimeout(() => {
+        setNotification((prev) => ({ ...prev, show: false }));
+      }, 5000); // Hide after 5 seconds
+    }
+    return () => clearTimeout(timer);
+  }, [notification.show]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -31,7 +49,11 @@ export default function Dashboard() {
     setIsSubmitting(true);
 
     if (!user) {
-      alert("You must be logged in to add an expense");
+      setNotification({
+        show: true,
+        message: "You must be logged in to add an expense",
+        type: "error",
+      });
       setIsSubmitting(false);
       return;
     }
@@ -69,7 +91,15 @@ export default function Dashboard() {
       }
       const data = await res.json();
       console.log("Expense created:", data);
-      alert("Expense added successfully!");
+
+      // Show success notification
+      setNotification({
+        show: true,
+        message: `$${payload.amount.toFixed(2)} ${
+          payload.category
+        } expense added successfully!`,
+        type: "success",
+      });
 
       // Reset form and close modal
       setExpenseData({
@@ -81,7 +111,13 @@ export default function Dashboard() {
       setShowExpenseForm(false);
     } catch (error) {
       console.error("Error adding expense:", error);
-      alert("Error adding expense. Please try again.");
+
+      // Show error notification
+      setNotification({
+        show: true,
+        message: "Error adding expense. Please try again.",
+        type: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -105,6 +141,33 @@ export default function Dashboard() {
 
   return (
     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 dark:bg-gray-900'>
+      {/* Custom Notification */}
+      {notification.show && (
+        <div
+          className={`fixed top-4 right-4 z-50 flex items-center p-4 mb-4 rounded-lg shadow-lg transform transition-all duration-500 animate-bounce ${
+            notification.type === "success"
+              ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+              : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+          }`}>
+          <div className='mr-3'>
+            {notification.type === "success" ? (
+              <Check className='w-6 h-6' />
+            ) : (
+              <AlertCircle className='w-6 h-6' />
+            )}
+          </div>
+          <div className='text-sm font-medium'>{notification.message}</div>
+          <button
+            type='button'
+            className='ml-4 inline-flex bg-transparent rounded-lg p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700'
+            onClick={() =>
+              setNotification((prev) => ({ ...prev, show: false }))
+            }>
+            <X className='w-4 h-4' />
+          </button>
+        </div>
+      )}
+
       {/* Stats Cards */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
         <Card className='p-6 dark:bg-gray-800 dark:border-gray-700'>
