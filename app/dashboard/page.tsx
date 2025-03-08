@@ -1,16 +1,27 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { LineChart, Target, Check, X, AlertCircle } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  LineChart,
+  Target,
+  Check,
+  X,
+  AlertCircle,
+  Upload,
+  FolderIcon,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { FolderIcon } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 
 export default function Dashboard() {
   const { user } = useUser();
   const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [showReceiptUpload, setShowReceiptUpload] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [expenseData, setExpenseData] = useState({
     amount: "",
     category: "",
@@ -18,6 +29,7 @@ export default function Dashboard() {
     date: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [receiptSource, setReceiptSource] = useState<string | null>(null);
 
   // New notification state
   const [notification, setNotification] = useState({
@@ -42,6 +54,102 @@ export default function Dashboard() {
   ) => {
     const { name, value } = e.target;
     setExpenseData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleReceiptUpload = async () => {
+    if (!selectedFile) {
+      setNotification({
+        show: true,
+        message: "Please select a receipt image to upload",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!user) {
+      setNotification({
+        show: true,
+        message: "You must be logged in to upload a receipt",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    // Generate a numerical userId from the Clerk user.id string
+    const numericUserId = generateNumericId(user.id);
+
+    const formData = new FormData();
+    formData.append("UserId", numericUserId.toString());
+    formData.append("ReceiptImage", selectedFile);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Receipts/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to upload receipt");
+      }
+
+      const data = await res.json();
+      console.log("Receipt uploaded successfully:", data);
+
+      setNotification({
+        show: true,
+        message: "Receipt processed successfully! Please review the details.",
+        type: "success",
+      });
+
+      // Populate expense form with data from receipt
+      if (data.amount || data.category || data.description || data.date) {
+        setExpenseData({
+          amount: data.amount?.toString() || "",
+          category: data.category || "",
+          description: data.description || "",
+          date: data.date || new Date().toISOString().split("T")[0],
+        });
+
+        // Set receipt source to track that this expense came from a receipt
+        setReceiptSource(data.receiptId || "receipt-upload");
+
+        // Close receipt upload modal and open expense form
+        setShowReceiptUpload(false);
+        setShowExpenseForm(true);
+      } else {
+        setNotification({
+          show: true,
+          message:
+            "Receipt processed, but no expense data could be extracted. Please enter details manually.",
+          type: "error",
+        });
+      }
+
+      // Reset the file selection
+      setSelectedFile(null);
+    } catch (error) {
+      console.error("Error uploading receipt:", error);
+      setNotification({
+        show: true,
+        message:
+          "Error processing receipt. Please try again or enter expense manually.",
+        type: "error",
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -74,6 +182,7 @@ export default function Dashboard() {
       category: expenseData.category,
       description: expenseData.description,
       date: expenseData.date, // expected format: YYYY-MM-DD
+      receiptSource: receiptSource, // Include receipt reference if this expense came from a receipt
     };
 
     try {
@@ -108,6 +217,7 @@ export default function Dashboard() {
         description: "",
         date: "",
       });
+      setReceiptSource(null);
       setShowExpenseForm(false);
     } catch (error) {
       console.error("Error adding expense:", error);
@@ -121,6 +231,30 @@ export default function Dashboard() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Handle cancellation of the expense form
+  const handleCancelExpense = () => {
+    // If this expense came from a receipt upload, show confirmation
+    if (receiptSource) {
+      if (window.confirm("Discard the data extracted from your receipt?")) {
+        resetExpenseForm();
+      }
+    } else {
+      resetExpenseForm();
+    }
+  };
+
+  // Reset the expense form state
+  const resetExpenseForm = () => {
+    setExpenseData({
+      amount: "",
+      category: "",
+      description: "",
+      date: "",
+    });
+    setReceiptSource(null);
+    setShowExpenseForm(false);
   };
 
   // Function to generate a consistent numeric ID from a string
@@ -218,8 +352,15 @@ export default function Dashboard() {
         </Button>
         <Button
           variant='secondary'
-          className='dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600'>
+          className='dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 hover:bg-blue-400'>
           <LineChart className='w-4 h-4 mr-2' /> Generate Report
+        </Button>
+        <Button
+          variant='secondary'
+          className='dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 hover:bg-blue-400'
+          onClick={() => setShowReceiptUpload(true)}
+          disabled={!user}>
+          <FolderIcon className='w-4 h-4 mr-2' /> Upload Receipt
         </Button>
       </div>
 
@@ -338,12 +479,20 @@ export default function Dashboard() {
           {/* Backdrop */}
           <div
             className='absolute inset-0 bg-black opacity-50'
-            onClick={() => setShowExpenseForm(false)}></div>
+            onClick={() => handleCancelExpense()}></div>
           {/* Modal Content */}
           <div className='bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg z-10 w-full max-w-md'>
             <h2 className='text-xl font-bold mb-4 dark:text-white'>
-              Add Expense
+              {receiptSource ? "Confirm Receipt Expense" : "Add Expense"}
             </h2>
+            {receiptSource && (
+              <div className='mb-4 p-3 bg-blue-50 dark:bg-blue-900 rounded-md'>
+                <p className='text-sm text-blue-700 dark:text-blue-300'>
+                  These details were extracted from your receipt. Please review
+                  and confirm.
+                </p>
+              </div>
+            )}
             <form onSubmit={handleSubmit}>
               <div className='mb-4'>
                 <label
@@ -411,7 +560,7 @@ export default function Dashboard() {
               <div className='flex justify-end space-x-4'>
                 <button
                   type='button'
-                  onClick={() => setShowExpenseForm(false)}
+                  onClick={handleCancelExpense}
                   className='px-4 py-2 bg-gray-300 dark:bg-gray-600 dark:text-gray-200 rounded hover:bg-gray-400 dark:hover:bg-gray-500'
                   disabled={isSubmitting}>
                   Cancel
@@ -420,10 +569,116 @@ export default function Dashboard() {
                   type='submit'
                   className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'
                   disabled={isSubmitting}>
-                  {isSubmitting ? "Submitting..." : "Submit"}
+                  {isSubmitting
+                    ? "Submitting..."
+                    : receiptSource
+                    ? "Confirm"
+                    : "Submit"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Receipt Upload Modal */}
+      {showReceiptUpload && (
+        <div className='fixed inset-0 flex items-center justify-center z-50'>
+          {/* Backdrop */}
+          <div
+            className='absolute inset-0 bg-black opacity-50'
+            onClick={() => !isUploading && setShowReceiptUpload(false)}></div>
+
+          {/* Modal Content */}
+          <div className='bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg z-10 w-full max-w-md'>
+            {isUploading ? (
+              <div className='flex flex-col items-center justify-center py-8'>
+                <iframe
+                  src='https://lottiefiles.com/free-animation/loading-sand-clock-YwwRRL2vx4'
+                  width='200'
+                  height='200'
+                  className='mb-4'></iframe>
+                <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>
+                  Processing receipt...
+                </p>
+                <p className='text-sm text-gray-500 dark:text-gray-400 mt-2'>
+                  We're extracting expense details from your receipt
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className='flex items-center justify-between mb-4'>
+                  <h2 className='text-xl font-bold dark:text-white'>
+                    Upload Receipt
+                  </h2>
+                  <button
+                    type='button'
+                    onClick={() => setShowReceiptUpload(false)}
+                    className='text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100'>
+                    <X className='w-5 h-5' />
+                  </button>
+                </div>
+                <div className='space-y-6'>
+                  <div className='relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center'>
+                    {selectedFile ? (
+                      <div className='space-y-2'>
+                        <div className='flex items-center justify-center'>
+                          <Check className='w-8 h-8 text-green-500' />
+                        </div>
+                        <p className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                          {selectedFile.name}
+                        </p>
+                        <p className='text-xs text-gray-500 dark:text-gray-400'>
+                          {(selectedFile.size / 1024).toFixed(2)} KB
+                        </p>
+                        <button
+                          type='button'
+                          className='text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300'
+                          onClick={() => setSelectedFile(null)}>
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div className='space-y-2'>
+                        <div className='flex items-center justify-center'>
+                          <Upload className='w-8 h-8 text-gray-400 dark:text-gray-500' />
+                        </div>
+                        <p className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                          Drag and drop a file or click to browse
+                        </p>
+                        <p className='text-xs text-gray-500 dark:text-gray-400'>
+                          Supports JPG, PNG, PDF (max 10MB)
+                        </p>
+                      </div>
+                    )}
+                    <input
+                      type='file'
+                      id='receipt'
+                      name='receipt'
+                      ref={fileInputRef}
+                      accept='image/jpeg,image/png,application/pdf'
+                      className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                  <div className='flex justify-end space-x-4'>
+                    <button
+                      type='button'
+                      onClick={() => setShowReceiptUpload(false)}
+                      className='px-4 py-2 bg-gray-300 dark:bg-gray-600 dark:text-gray-200 rounded hover:bg-gray-400 dark:hover:bg-gray-500'>
+                      Cancel
+                    </button>
+                    <button
+                      type='button'
+                      onClick={handleReceiptUpload}
+                      className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'
+                      disabled={!selectedFile}>
+                      Process Receipt
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

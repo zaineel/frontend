@@ -9,7 +9,7 @@ export default function Page() {
         <span className='ml-2 text-2xl font-bold'>BudgetBuddy</span>
       </div>
       <SignUp
-        fallbackRedirectUrl='https://budgetbuddy.zaineelmithani.com/dashboard'
+        fallbackRedirectUrl='/dashboard'
         forceRedirectUrl='https://budgetbuddy.zaineelmithani.com/dashboard'
       />
     </div>
