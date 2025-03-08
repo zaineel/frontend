@@ -594,7 +594,7 @@ export default function Dashboard() {
             {isUploading ? (
               <div className='flex flex-col items-center justify-center py-8'>
                 <iframe
-                  src='https://lottiefiles.com/free-animation/loading-sand-clock-YwwRRL2vx4'
+                  src='Animation - 1741399814223.gif'
                   width='200'
                   height='200'
                   className='mb-4'></iframe>
