@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
+import ActionButtons from "./action-buttons";
 
 export default function Dashboard() {
   const { user } = useUser();
@@ -302,6 +303,18 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Action Buttons */}
+      <ActionButtons
+        onAddExpense={() => setShowExpenseForm(true)}
+        onSetGoal={() => {
+          /* Add goal functionality */
+        }}
+        onGenerateReport={() => {
+          /* Add report generation functionality */
+        }}
+        onUploadReceipt={() => setShowReceiptUpload(true)}
+      />
+
       {/* Stats Cards */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
         <Card className='p-6 dark:bg-gray-800 dark:border-gray-700'>
@@ -337,31 +350,6 @@ export default function Dashboard() {
             <span className='ml-2 text-sm text-red-500'>↓ 0.8%</span>
           </div>
         </Card>
-      </div>
-
-      {/* Action Buttons */}
-      <div className='flex space-x-4 mb-8'>
-        <Button
-          className='bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'
-          onClick={() => setShowExpenseForm(true)}
-          disabled={!user}>
-          + Add Expense
-        </Button>
-        <Button className='bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-800'>
-          <Target className='w-4 h-4 mr-2' /> Set Goal
-        </Button>
-        <Button
-          variant='secondary'
-          className='dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 hover:bg-blue-400'>
-          <LineChart className='w-4 h-4 mr-2' /> Generate Report
-        </Button>
-        <Button
-          variant='secondary'
-          className='dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 hover:bg-blue-400'
-          onClick={() => setShowReceiptUpload(true)}
-          disabled={!user}>
-          <FolderIcon className='w-4 h-4 mr-2' /> Upload Receipt
-        </Button>
       </div>
 
       {/* Budget Overview and Transactions */}
