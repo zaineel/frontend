@@ -4,7 +4,17 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Expense = {
   id: number;
@@ -21,6 +31,9 @@ export default function Expenses() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Function to generate a consistent numeric ID from a string
   // Must match exactly with the function in Dashboard.tsx
@@ -94,6 +107,41 @@ export default function Expenses() {
     return expense.userId === currentUserNumericId;
   });
 
+  const handleDelete = async (expense: Expense) => {
+    setExpenseToDelete(expense);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!expenseToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Expenses?id=${expenseToDelete.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete expense");
+      }
+
+      // Remove the deleted expense from the state
+      setExpenses((prevExpenses) =>
+        prevExpenses.filter((expense) => expense.id !== expenseToDelete.id)
+      );
+    } catch (err) {
+      console.error("Error deleting expense:", err);
+      setError("Failed to delete expense");
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setExpenseToDelete(null);
+    }
+  };
+
   return (
     <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
       <div className='flex justify-between items-center mb-8'>
@@ -125,13 +173,22 @@ export default function Expenses() {
             <Card
               key={expense.id}
               className='p-4 hover:shadow-lg transition-shadow'>
-              <div className='flex justify-between items-center'>
+              <div className='flex justify-between items-start'>
                 <div>
                   <h3 className='text-lg font-bold'>{expense.category}</h3>
                   <p className='text-gray-600'>{expense.description}</p>
                 </div>
-                <div className='text-xl font-bold text-green-600'>
-                  ${expense.amount.toFixed(2)}
+                <div className='flex flex-col items-end'>
+                  <div className='text-xl font-bold text-green-600'>
+                    ${expense.amount.toFixed(2)}
+                  </div>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30'
+                    onClick={() => handleDelete(expense)}>
+                    <Trash2 className='h-4 w-4' />
+                  </Button>
                 </div>
               </div>
               <p className='text-sm text-gray-500 mt-2'>
@@ -141,6 +198,34 @@ export default function Expenses() {
           ))}
         </div>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Expense</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this expense? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className='bg-red-500 hover:bg-red-600'
+              disabled={isDeleting}>
+              {isDeleting ? (
+                <>
+                  <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
