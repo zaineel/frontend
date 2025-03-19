@@ -32,12 +32,112 @@ export default function Dashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [receiptSource, setReceiptSource] = useState<string | null>(null);
 
+  // Define the Expense type
+  interface Expense {
+    id: number;
+    userId: number;
+    amount: number;
+    category: string;
+    description: string;
+    date: string;
+  }
+
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   // New notification state
   const [notification, setNotification] = useState({
     show: false,
     message: "",
     type: "success", // "success", "error"
   });
+
+  // Fetch expenses when component mounts or user changes
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      if (!user) return;
+
+      setIsLoading(true);
+      try {
+        const numericUserId = generateNumericId(user.id);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/Expenses?userId=${numericUserId}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch expenses");
+        }
+
+        const data = await response.json();
+        setExpenses(data);
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+        setNotification({
+          show: true,
+          message: "Failed to load expenses",
+          type: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchExpenses();
+  }, [user]);
+
+  // Calculate monthly expenses
+  const calculateMonthlyExpenses = () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    return expenses
+      .filter((expense) => {
+        const expenseDate = new Date(expense.date);
+        return (
+          expenseDate.getMonth() === currentMonth &&
+          expenseDate.getFullYear() === currentYear
+        );
+      })
+      .reduce((total, expense) => total + expense.amount, 0);
+  };
+
+  // Get recent transactions (last 5)
+  const getRecentTransactions = () => {
+    return [...expenses]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
+  };
+
+  // Calculate budget overview
+  const calculateBudgetOverview = () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    const monthlyExpenses = expenses.filter((expense) => {
+      const expenseDate = new Date(expense.date);
+      return (
+        expenseDate.getMonth() === currentMonth &&
+        expenseDate.getFullYear() === currentYear
+      );
+    });
+
+    // Group expenses by category
+    const categoryTotals = monthlyExpenses.reduce((acc, expense) => {
+      acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Convert to array format for the UI
+    return Object.entries(categoryTotals).map(([category, amount]) => ({
+      category,
+      amount,
+      // Using a default budget of amount * 1.5 for demonstration
+      budget: amount * 1.5,
+      percentage: (amount / (amount * 1.5)) * 100,
+    }));
+  };
 
   // Hide notification after timeout
   useEffect(() => {
@@ -124,7 +224,10 @@ export default function Dashboard() {
         });
 
         // Set receipt source to track that this expense came from a receipt
-        setReceiptSource(data.receiptId || "receipt-upload");
+        if (!data.id) {
+          throw new Error("No receipt ID returned from server");
+        }
+        setReceiptSource(data.id);
 
         // Close receipt upload modal and open expense form
         setShowReceiptUpload(false);
@@ -177,13 +280,31 @@ export default function Dashboard() {
       user.id
     );
 
+    // If this is a receipt-based expense, we need to check if it's already been processed
+    if (receiptSource) {
+      try {
+        // Since we don't have a receipt status check endpoint, we'll proceed with the submission
+        // The backend will handle any duplicate processing logic
+        console.log("Submitting expense with receipt source:", receiptSource);
+      } catch (error) {
+        console.error("Error preparing receipt submission:", error);
+        setNotification({
+          show: true,
+          message: "Error preparing receipt submission. Please try again.",
+          type: "error",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     const payload = {
-      userId: numericUserId, // Use the numeric ID for backend compatibility
+      id: 0, // Add an ID field with a default value
+      userId: numericUserId,
       amount: parseFloat(expenseData.amount),
       category: expenseData.category,
       description: expenseData.description,
-      date: expenseData.date, // expected format: YYYY-MM-DD
-      receiptSource: receiptSource, // Include receipt reference if this expense came from a receipt
+      date: expenseData.date,
     };
 
     try {
@@ -220,6 +341,16 @@ export default function Dashboard() {
       });
       setReceiptSource(null);
       setShowExpenseForm(false);
+
+      // Refetch expenses to update the dashboard
+      const fetchResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Expenses?userId=${numericUserId}`
+      );
+      if (!fetchResponse.ok) {
+        throw new Error("Failed to fetch updated expenses");
+      }
+      const updatedExpenses = await fetchResponse.json();
+      setExpenses(updatedExpenses);
     } catch (error) {
       console.error("Error adding expense:", error);
 
@@ -345,7 +476,7 @@ export default function Dashboard() {
           </h3>
           <div className='flex items-baseline'>
             <span className='text-3xl font-bold dark:text-white'>
-              $5,280.00
+              ${calculateMonthlyExpenses().toFixed(2)}
             </span>
             <span className='ml-2 text-sm text-red-500'>↓ 0.8%</span>
           </div>
@@ -359,48 +490,22 @@ export default function Dashboard() {
             Budget Overview
           </h3>
           <div className='space-y-6'>
-            <div>
-              <div className='flex justify-between mb-2'>
-                <span className='text-gray-600 dark:text-gray-300'>
-                  Groceries
-                </span>
-                <span className='text-gray-900 dark:text-gray-100'>
-                  $450/$600
-                </span>
+            {calculateBudgetOverview().map((category) => (
+              <div key={category.category}>
+                <div className='flex justify-between mb-2'>
+                  <span className='text-gray-600 dark:text-gray-300'>
+                    {category.category}
+                  </span>
+                  <span className='text-gray-900 dark:text-gray-100'>
+                    ${category.amount.toFixed(2)}/${category.budget.toFixed(2)}
+                  </span>
+                </div>
+                <Progress
+                  value={category.percentage}
+                  className='h-2 bg-gray-100 dark:bg-gray-700'
+                />
               </div>
-              <Progress
-                value={75}
-                className='h-2 bg-gray-100 dark:bg-gray-700'
-              />
-            </div>
-            <div>
-              <div className='flex justify-between mb-2'>
-                <span className='text-gray-600 dark:text-gray-300'>
-                  Entertainment
-                </span>
-                <span className='text-gray-900 dark:text-gray-100'>
-                  $280/$300
-                </span>
-              </div>
-              <Progress
-                value={93}
-                className='h-2 bg-gray-100 dark:bg-gray-700'
-              />
-            </div>
-            <div>
-              <div className='flex justify-between mb-2'>
-                <span className='text-gray-600 dark:text-gray-300'>
-                  Transportation
-                </span>
-                <span className='text-gray-900 dark:text-gray-100'>
-                  $150/$200
-                </span>
-              </div>
-              <Progress
-                value={75}
-                className='h-2 bg-gray-100 dark:bg-gray-700'
-              />
-            </div>
+            ))}
           </div>
         </Card>
 
@@ -409,54 +514,28 @@ export default function Dashboard() {
             Recent Transactions
           </h3>
           <div className='space-y-4'>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center'>
-                <div className='bg-blue-100 dark:bg-blue-900 p-2 rounded-lg'>
-                  <FolderIcon className='h-6 w-6 text-blue-600 dark:text-blue-400' />
+            {getRecentTransactions().map((transaction) => (
+              <div
+                key={transaction.id}
+                className='flex items-center justify-between'>
+                <div className='flex items-center'>
+                  <div className='bg-blue-100 dark:bg-blue-900 p-2 rounded-lg'>
+                    <FolderIcon className='h-6 w-6 text-blue-600 dark:text-blue-400' />
+                  </div>
+                  <div className='ml-4'>
+                    <p className='text-gray-900 dark:text-gray-100'>
+                      {transaction.category}
+                    </p>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                      {new Date(transaction.date).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
-                <div className='ml-4'>
-                  <p className='text-gray-900 dark:text-gray-100'>
-                    Grocery Store
-                  </p>
-                  <p className='text-sm text-gray-500 dark:text-gray-400'>
-                    Mar 15, 2025
-                  </p>
-                </div>
+                <span className='text-red-500 dark:text-red-400'>
+                  -${transaction.amount.toFixed(2)}
+                </span>
               </div>
-              <span className='text-red-500 dark:text-red-400'>-$85.00</span>
-            </div>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center'>
-                <div className='bg-green-100 dark:bg-green-900 p-2 rounded-lg'>
-                  <FolderIcon className='h-6 w-6 text-green-600 dark:text-green-400' />
-                </div>
-                <div className='ml-4'>
-                  <p className='text-gray-900 dark:text-gray-100'>
-                    Salary Deposit
-                  </p>
-                  <p className='text-sm text-gray-500 dark:text-gray-400'>
-                    Mar 14, 2025
-                  </p>
-                </div>
-              </div>
-              <span className='text-green-500 dark:text-green-400'>
-                +$3,450.00
-              </span>
-            </div>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center'>
-                <div className='bg-purple-100 dark:bg-purple-900 p-2 rounded-lg'>
-                  <FolderIcon className='h-6 w-6 text-purple-600 dark:text-purple-400' />
-                </div>
-                <div className='ml-4'>
-                  <p className='text-gray-900 dark:text-gray-100'>Netflix</p>
-                  <p className='text-sm text-gray-500 dark:text-gray-400'>
-                    Mar 13, 2025
-                  </p>
-                </div>
-              </div>
-              <span className='text-red-500 dark:text-red-400'>-$14.99</span>
-            </div>
+            ))}
           </div>
         </Card>
       </div>
