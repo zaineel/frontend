@@ -26,7 +26,7 @@ The frontend is built using Next.js to provide a responsive and intuitive user e
 1. Clone the repository
 
    ```bash
-   git clone [repository URL]
+   git clone git@github.com:zaineel/frontend.git
    ```
 
 2. Navigate to the frontend directory
@@ -94,4 +94,4 @@ The application is deployed and accessible at: https://budgetbuddy.zaineelmithan
 
 ## Contact
 
-For questions or issues related to the frontend, please contact [your contact information or process].
+For questions or issues related to the frontend, please create github issues.
