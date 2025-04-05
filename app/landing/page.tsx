@@ -42,112 +42,112 @@ const PricingModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4'>
-      <div className='bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full p-6 sm:p-8 relative animate-fade-in'>
+    <div className='fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2'>
+      <div className='bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg mx-auto p-4 sm:p-6 relative animate-fade-in overflow-y-auto max-h-[90vh]'>
         <button
           onClick={onClose}
-          className='absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'>
-          <X className='h-6 w-6' />
+          className='absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'>
+          <X className='h-5 w-5' />
         </button>
 
-        <div className='text-center mb-8'>
-          <h2 className='text-3xl font-bold mb-4 dark:text-white'>
+        <div className='text-center mb-6'>
+          <h2 className='text-2xl sm:text-3xl font-bold mb-2 dark:text-white'>
             Choose Your Plan
           </h2>
-          <p className='text-gray-600 dark:text-gray-300'>
+          <p className='text-sm sm:text-base text-gray-600 dark:text-gray-300'>
             Start your journey to better financial health today
           </p>
         </div>
 
-        <div className='grid md:grid-cols-2 gap-8'>
+        <div className='space-y-4'>
           {/* Free Trial Plan */}
-          <div className='bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border-2 border-blue-500'>
-            <h3 className='text-2xl font-bold mb-4 dark:text-white'>
+          <div className='bg-gray-50 dark:bg-gray-700 rounded-xl p-4 sm:p-6 border-2 border-blue-500'>
+            <h3 className='text-xl sm:text-2xl font-bold mb-2 dark:text-white'>
               7-Day Free Trial
             </h3>
-            <p className='text-gray-600 dark:text-gray-300 mb-4'>
+            <p className='text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-3'>
               Try all premium features risk-free
             </p>
-            <ul className='space-y-3 mb-6'>
-              <li className='flex items-center text-gray-600 dark:text-gray-300'>
-                <Check className='h-5 w-5 text-green-500 mr-2' />
+            <ul className='space-y-2 mb-4'>
+              <li className='flex items-center text-gray-600 dark:text-gray-300 text-sm sm:text-base'>
+                <Check className='h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 flex-shrink-0' />
                 Full access to all features
               </li>
-              <li className='flex items-center text-gray-600 dark:text-gray-300'>
-                <Check className='h-5 w-5 text-green-500 mr-2' />
+              <li className='flex items-center text-gray-600 dark:text-gray-300 text-sm sm:text-base'>
+                <Check className='h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 flex-shrink-0' />
                 No credit card required
               </li>
-              <li className='flex items-center text-gray-600 dark:text-gray-300'>
-                <Check className='h-5 w-5 text-green-500 mr-2' />
+              <li className='flex items-center text-gray-600 dark:text-gray-300 text-sm sm:text-base'>
+                <Check className='h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 flex-shrink-0' />
                 Cancel anytime
               </li>
             </ul>
-            <Link href='/sign-up'>
-              <button className='w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transform transition-all duration-200 hover:scale-105'>
+            <Link href='/sign-up' className='block'>
+              <button className='w-full bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:bg-blue-700 transform transition-all duration-200 hover:scale-105 text-sm sm:text-base'>
                 Start Free Trial
               </button>
             </Link>
           </div>
 
           {/* Premium Plan */}
-          <div className='bg-blue-600 dark:bg-blue-700 rounded-xl p-6 text-white'>
-            <h3 className='text-2xl font-bold mb-4'>Premium Plan</h3>
-            <div className='mb-4'>
-              <span className='text-4xl font-bold'>$9.99</span>
+          <div className='bg-blue-600 dark:bg-blue-700 rounded-xl p-4 sm:p-6 text-white'>
+            <h3 className='text-xl sm:text-2xl font-bold mb-2'>Premium Plan</h3>
+            <div className='mb-3'>
+              <span className='text-3xl sm:text-4xl font-bold'>$9.99</span>
               <span className='text-blue-100'>/month</span>
             </div>
-            <ul className='space-y-3 mb-6'>
-              <li className='flex items-center'>
-                <Check className='h-5 w-5 text-blue-200 mr-2' />
+            <ul className='space-y-2 mb-4'>
+              <li className='flex items-center text-sm sm:text-base'>
+                <Check className='h-4 w-4 sm:h-5 sm:w-5 text-blue-200 mr-2 flex-shrink-0' />
                 Advanced analytics and insights
               </li>
-              <li className='flex items-center'>
-                <Check className='h-5 w-5 text-blue-200 mr-2' />
+              <li className='flex items-center text-sm sm:text-base'>
+                <Check className='h-4 w-4 sm:h-5 sm:w-5 text-blue-200 mr-2 flex-shrink-0' />
                 Custom budget categories
               </li>
-              <li className='flex items-center'>
-                <Check className='h-5 w-5 text-blue-200 mr-2' />
+              <li className='flex items-center text-sm sm:text-base'>
+                <Check className='h-4 w-4 sm:h-5 sm:w-5 text-blue-200 mr-2 flex-shrink-0' />
                 Priority customer support
               </li>
-              <li className='flex items-center'>
-                <Check className='h-5 w-5 text-blue-200 mr-2' />
+              <li className='flex items-center text-sm sm:text-base'>
+                <Check className='h-4 w-4 sm:h-5 sm:w-5 text-blue-200 mr-2 flex-shrink-0' />
                 Export financial reports
               </li>
             </ul>
-            <Link href='/sign-up'>
-              <button className='w-full bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 transform transition-all duration-200 hover:scale-105'>
+            <Link href='/sign-up' className='block'>
+              <button className='w-full bg-white text-blue-600 px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:bg-blue-50 transform transition-all duration-200 hover:scale-105 text-sm sm:text-base'>
                 Get Premium
               </button>
             </Link>
           </div>
         </div>
 
-        <div className='mt-8 text-center'>
-          <h4 className='text-xl font-semibold mb-4 dark:text-white'>
+        <div className='mt-6 text-center'>
+          <h4 className='text-lg sm:text-xl font-semibold mb-3 dark:text-white'>
             Why Choose Budget Buddy?
           </h4>
-          <div className='grid sm:grid-cols-3 gap-4 text-sm'>
-            <div className='p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
-              <h5 className='font-semibold mb-2 dark:text-white'>
+          <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm'>
+            <div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
+              <h5 className='font-semibold mb-1 dark:text-white'>
                 Smart Analytics
               </h5>
-              <p className='text-gray-600 dark:text-gray-300'>
+              <p className='text-xs sm:text-sm text-gray-600 dark:text-gray-300'>
                 AI-powered insights to optimize your spending
               </p>
             </div>
-            <div className='p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
-              <h5 className='font-semibold mb-2 dark:text-white'>
+            <div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
+              <h5 className='font-semibold mb-1 dark:text-white'>
                 Bank-Level Security
               </h5>
-              <p className='text-gray-600 dark:text-gray-300'>
+              <p className='text-xs sm:text-sm text-gray-600 dark:text-gray-300'>
                 Your data is protected with enterprise-grade encryption
               </p>
             </div>
-            <div className='p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
-              <h5 className='font-semibold mb-2 dark:text-white'>
+            <div className='p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'>
+              <h5 className='font-semibold mb-1 dark:text-white'>
                 24/7 Support
               </h5>
-              <p className='text-gray-600 dark:text-gray-300'>
+              <p className='text-xs sm:text-sm text-gray-600 dark:text-gray-300'>
                 Get help whenever you need it
               </p>
             </div>
