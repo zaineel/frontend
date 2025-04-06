@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import Link, { LinkProps } from "next/link";
 import React, { useState, createContext, useContext } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 
 interface Links {
@@ -89,7 +89,7 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-full px-4 py-4 hidden  md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] shrink-0",
+          "h-full min-h-[calc(100vh-4rem)] px-4 py-4 hidden md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] shrink-0 border-r border-gray-200 dark:border-gray-700",
           className
         )}
         animate={{

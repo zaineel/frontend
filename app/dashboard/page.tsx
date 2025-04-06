@@ -497,10 +497,8 @@ export default function Dashboard() {
             Total Balance
           </h3>
           <div className='flex items-baseline'>
-            <span className='text-3xl font-bold dark:text-white'>
-              $24,562.00
-            </span>
-            <span className='ml-2 text-sm text-green-500'>↑ 2.5%</span>
+            <span className='text-3xl font-bold dark:text-white'>$0.00</span>
+            <span className='ml-2 text-sm text-green-500'>↑ 0.0%</span>
           </div>
         </Card>
         <Card className='p-6 dark:bg-gray-800 dark:border-gray-700'>
@@ -508,10 +506,8 @@ export default function Dashboard() {
             Monthly Income
           </h3>
           <div className='flex items-baseline'>
-            <span className='text-3xl font-bold dark:text-white'>
-              $8,350.00
-            </span>
-            <span className='ml-2 text-sm text-green-500'>↑ 1.2%</span>
+            <span className='text-3xl font-bold dark:text-white'>$0.00</span>
+            <span className='ml-2 text-sm text-green-500'>↑ 0.0%</span>
           </div>
         </Card>
         <Card className='p-6 dark:bg-gray-800 dark:border-gray-700'>
@@ -522,7 +518,7 @@ export default function Dashboard() {
             <span className='text-3xl font-bold dark:text-white'>
               ${calculateMonthlyExpenses().toFixed(2)}
             </span>
-            <span className='ml-2 text-sm text-red-500'>↓ 0.8%</span>
+            <span className='ml-2 text-sm text-red-500'>↓ 0.0%</span>
           </div>
         </Card>
       </div>

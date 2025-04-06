@@ -42,6 +42,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type ReportData = {
   monthlyExpenses: {
@@ -76,6 +84,8 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
   const [chartType, setChartType] = useState("bar");
   const [error, setError] = useState("");
+  const [exportLoading, setExportLoading] = useState(false);
+  const [showExportOptions, setShowExportOptions] = useState(false);
 
   const fetchReportData = async () => {
     try {
@@ -103,9 +113,38 @@ export default function Reports() {
     fetchReportData();
   }, [timeRange]);
 
-  const handleExportReport = () => {
-    // This would generate a PDF/CSV in a real application
-    toast("Report exported successfully!");
+  const handleExportReport = async (format: string = "csv") => {
+    try {
+      setExportLoading(true);
+
+      // Create a download URL for the CSV report
+      const downloadUrl = `/api/Expenses/reports/download?timeRange=${timeRange}&format=csv`;
+
+      // Create a temporary link element
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.setAttribute(
+        "download",
+        `financial_report_${timeRange}_${
+          new Date().toISOString().split("T")[0]
+        }.csv`
+      );
+
+      // Append to the document, click it, and remove it
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast("Report downloaded successfully!");
+      setShowExportOptions(false);
+    } catch (error) {
+      console.error("Error downloading report:", error);
+      toast("Failed to download report. Please try again.", {
+        description: "There was an issue generating your report.",
+      });
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   // Currency formatter
@@ -133,10 +172,32 @@ export default function Reports() {
               <SelectItem value='year'>Last Year</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleExportReport} className='w-full sm:w-auto'>
-            <Download className='h-4 w-4 mr-2' />
-            Export Report
-          </Button>
+
+          <DropdownMenu
+            open={showExportOptions}
+            onOpenChange={setShowExportOptions}>
+            <DropdownMenuTrigger asChild>
+              <Button className='w-full sm:w-auto'>
+                <Download className='h-4 w-4 mr-2' />
+                {exportLoading ? "Downloading..." : "Export Report"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end' className='w-48'>
+              <DropdownMenuLabel>Choose Format</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                disabled={exportLoading}
+                onClick={() => handleExportReport("csv")}>
+                CSV Format
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled={true}>
+                PDF Format (Coming Soon)
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled={true}>
+                Excel Format (Coming Soon)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
