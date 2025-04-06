@@ -1,12 +1,22 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { Check, X, Loader2 } from "lucide-react";
 import { useSubscription } from "../context/SubscriptionContext";
 import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function SubscribePage() {
+// Loading component to show while suspense is resolving
+function LoadingState() {
+  return (
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center'>
+      <div className='animate-spin h-8 w-8 border-4 border-blue-600 dark:border-blue-400 rounded-full border-t-transparent'></div>
+    </div>
+  );
+}
+
+// The main subscribe page content component
+function SubscribePageContent() {
   const { user, isLoaded: userLoaded } = useUser();
   const {
     subscription,
@@ -250,51 +260,35 @@ export default function SubscribePage() {
                     Processing...
                   </span>
                 ) : (
-                  "Get Premium"
+                  "Subscribe Now"
                 )}
               </button>
             </div>
           </div>
 
-          {/* FAQ */}
-          <div className='mt-16'>
-            <h2 className='text-2xl font-bold mb-6 text-center dark:text-white'>
-              Frequently Asked Questions
-            </h2>
-            <div className='space-y-6'>
-              <div className='bg-white dark:bg-gray-800 rounded-lg p-5 shadow'>
-                <h3 className='font-semibold mb-2 dark:text-white'>
-                  What happens when my free trial ends?
-                </h3>
-                <p className='text-gray-600 dark:text-gray-300'>
-                  After your 7-day free trial ends, you'll need to upgrade to
-                  our Premium plan to continue using all features.
-                </p>
-              </div>
-              <div className='bg-white dark:bg-gray-800 rounded-lg p-5 shadow'>
-                <h3 className='font-semibold mb-2 dark:text-white'>
-                  Can I cancel my subscription?
-                </h3>
-                <p className='text-gray-600 dark:text-gray-300'>
-                  Yes, you can cancel your subscription at any time. If you
-                  cancel, you'll still have access until the end of your current
-                  billing period.
-                </p>
-              </div>
-              <div className='bg-white dark:bg-gray-800 rounded-lg p-5 shadow'>
-                <h3 className='font-semibold mb-2 dark:text-white'>
-                  Is my payment information secure?
-                </h3>
-                <p className='text-gray-600 dark:text-gray-300'>
-                  Yes, we use Stripe for all payment processing. Your payment
-                  information is securely handled by Stripe and never stored on
-                  our servers.
-                </p>
-              </div>
-            </div>
+          {/* Additional info */}
+          <div className='mt-12 text-center'>
+            <p className='text-gray-600 dark:text-gray-300 max-w-2xl mx-auto'>
+              Questions about our plans? Contact our{" "}
+              <a
+                href='#'
+                className='text-blue-600 dark:text-blue-400 underline'>
+                customer support
+              </a>{" "}
+              team for assistance.
+            </p>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component with Suspense
+export default function SubscribePage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <SubscribePageContent />
+    </Suspense>
   );
 }
