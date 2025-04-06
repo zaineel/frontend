@@ -8,10 +8,7 @@ export default function Page() {
         <FolderIcon className='h-10 w-10 text-blue-600' />
         <span className='ml-2 text-2xl font-bold'>BudgetBuddy</span>
       </div>
-      <SignUp
-        fallbackRedirectUrl='/dashboard'
-        forceRedirectUrl='https://budgetbuddy.zaineelmithani.com/dashboard'
-      />
+      <SignUp afterSignOutUrl='/subscribe' fallbackRedirectUrl='/subscribe' />
     </div>
   );
 }

@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SubscriptionProvider } from "./context/SubscriptionContext";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +23,8 @@ export default function RootLayout({
       <html lang='en' suppressHydrationWarning>
         <body className={inter.className}>
           <ThemeProvider defaultTheme='dark' storageKey='budget-buddy-theme'>
-            {children}
+            <SubscriptionProvider>{children}</SubscriptionProvider>
+            <Toaster position='top-right' />
           </ThemeProvider>
         </body>
       </html>

@@ -15,9 +15,14 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
 import ActionButtons from "./action-buttons";
+import { useSubscription } from "../context/SubscriptionContext";
+import { useRouter } from "next/navigation";
+import SubscriptionStatus from "./subscription-status";
 
 export default function Dashboard() {
   const { user } = useUser();
+  const { subscription, isSubscriptionValid } = useSubscription();
+  const router = useRouter();
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showReceiptUpload, setShowReceiptUpload] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -51,6 +56,40 @@ export default function Dashboard() {
     message: "",
     type: "success", // "success", "error"
   });
+
+  // Check if user has valid subscription
+  useEffect(() => {
+    if (user && !isSubscriptionValid) {
+      // Check if this is a success redirect from Stripe
+      const urlParams = new URLSearchParams(window.location.search);
+      const isSuccessfulPayment =
+        urlParams.get("success") === "true" && urlParams.has("session_id");
+
+      if (isSuccessfulPayment) {
+        // Set the subscription cookie if this is a successful redirect
+        document.cookie = `has_subscription=true; path=/; max-age=${
+          60 * 60 * 24 * 30
+        }`;
+        console.log("Setting subscription cookie after successful payment");
+
+        // Show success notification
+        setNotification({
+          show: true,
+          message: "Your subscription has been activated successfully!",
+          type: "success",
+        });
+
+        // Don't redirect since we're already on the dashboard
+        return;
+      }
+
+      // Otherwise redirect to subscribe page
+      console.log(
+        "No valid subscription detected, redirecting to subscribe page"
+      );
+      router.push("/subscribe");
+    }
+  }, [user, isSubscriptionValid, router]);
 
   // Fetch expenses when component mounts or user changes
   useEffect(() => {
@@ -445,6 +484,11 @@ export default function Dashboard() {
         }}
         onUploadReceipt={() => setShowReceiptUpload(true)}
       />
+
+      {/* Subscription Status */}
+      <div className='mb-8'>
+        <SubscriptionStatus />
+      </div>
 
       {/* Stats Cards */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
